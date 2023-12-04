@@ -1,18 +1,9 @@
 import { getData, dataToArray } from "../utils/getData";
 
-const getGameId = (string: string) => {
-    const firstTurnString = string;
-    const fullStringArray = firstTurnString.split(" ");
-    const getGameIdArray = fullStringArray[1].split(":");
-    const gameId = getGameIdArray[0];
-    return gameId
-}
-
 const splitGameIntoTurnsArray = (string: string) => {
     let gameString = string;
     const removedGameIdArray = gameString.split(":");
     const splitTurnsArray = removedGameIdArray[1].split(";")
-    // console.log(splitTurnsArray);
     return splitTurnsArray;
 }
 
@@ -26,7 +17,6 @@ const getNumberColourTuple = (string: string) => {
     colour = colouredCubesArray[2];
     const numberColourTuple: [number, string] = [numberOfCubes, colour];
     
-    console.log('coloured cubes:', numberColourTuple);
     return numberColourTuple
 }
 
@@ -46,43 +36,40 @@ const calculateTurn = (string: string) => {
         if (colour == "red") { red += number };
         if (colour == "blue") { blue += number };
     }
-
-    if (green > 13 || red > 12 || blue > 14) {
-        return false
-    } else {
-        return true
-    }
+    return [{green: green, red: red, blue: blue}]
 }
-
-// 12 red cubes, 13 green cubes, and 14 blue cubes
 
 const sumGameIDs = () => {
     // getData('../day2/testFiles/smallTestFilePart1.txt').then((data) => {
-    getData('../day2/testFiles/largeTestFilePart1.txt').then((data) => {
+    getData('../day2/testFiles/largeTestFilePart2.txt').then((data) => {
         const array = dataToArray(data);
-        // console.log('Array: ',array);
         let sum = 0;
-        for (let i = 0; i < array.length; i++) {
-            const gameId = getGameId(array[i]);
-            const arraySplitIntoTurns = splitGameIntoTurnsArray(array[i]);
-            // console.log("array split into turns: ", arraySplitIntoTurns);
+        let greenCubes = 0;
+        let redCubes = 0;
+        let blueCubes = 0;
 
-            let numberOfPossibleTurns = 0;
+        for (let i = 0; i < array.length; i++) {
+            const arraySplitIntoTurns = splitGameIntoTurnsArray(array[i]);
 
             for(let i = 0; i < arraySplitIntoTurns.length; i++) {
-                const isTheTurnPossible = calculateTurn(arraySplitIntoTurns[i]);
-                if (isTheTurnPossible) {
-                    console.log(`Game ID ${gameId}, Turn ${i + 1} is possible`);
-                    numberOfPossibleTurns += 1;
-                } else {
-                    console.log(`Game ID ${gameId}, Turn ${i + 1} is NOT possible`);
+                const [cubes] = calculateTurn(arraySplitIntoTurns[i]);
+
+                if (greenCubes < cubes.green) {
+                    greenCubes = cubes.green
+                }
+                if (blueCubes < cubes.blue) {
+                    blueCubes = cubes.blue
+                }
+                if (redCubes < cubes.red) {
+                    redCubes = cubes.red
                 }
             }
 
-            console.log('Game ID: ', gameId);
-            if (numberOfPossibleTurns == arraySplitIntoTurns.length) {
-                sum = sum + Number(gameId);
-            }
+            sum = sum + (greenCubes * redCubes * blueCubes);
+
+            greenCubes = 0;
+            redCubes = 0;
+            blueCubes = 0;
 
         }
         console.log(sum);
